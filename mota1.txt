@@ -1,0 +1,26 @@
+Sess.	Learning-Teaching Method	Content	Student's materials	Student's task	Lecturer's Materials	Lecturer's task	Student's materials link	Lecturer's Materials link
+2
+1	Blended (Hướng dẫn + Tự thực hành)	Bài 1: Giới thiệu dự án quản lý kho	Syllabus, Slide, Project Description	Đọc yêu cầu, thảo luận chức năng chính	Syllabus, Slide	Giới thiệu dự án, phân tích nghiệp vụ
+3
+2	Blended (Hướng dẫn + Tự thực hành)	Bài 2: Agile/Scrum và Use Case	Syllabus, Slide, Agile Guide, Use Case Template	Tìm hiểu Agile, vẽ Use Case Diagram	Syllabus, Agile Guide	Hướng dẫn Agile, thiết kế Use Case
+4
+3	Blended (Hướng dẫn + Tự thực hành)	Bài 3: Thiết kế Wireframe và ERD	Syllabus, Wireframe Template, ERD Template	Vẽ Wireframe giao diện, ERD cơ bản	Syllabus, Design Guide	Hướng dẫn thiết kế Wireframe, ERD
+5
+4	Blended (Hướng dẫn + Tự thực hành)	Bài 4: Thiết kế cơ sở dữ liệu	Syllabus, Database Script Template	Viết script SQL tạo bảng, dữ liệu mẫu	Syllabus, Database Guide	Hướng dẫn viết SQL, kiểm tra script
+6
+5	Blended (Hướng dẫn + Tự thực hành)	Bài 5: Cài đặt môi trường và dự án	Syllabus, IDE Installation Guide, Project Template	Cài đặt Eclipse/IntelliJ, MySQL, tạo project Java	Syllabus, Setup Guide	Hướng dẫn cài đặt, khởi tạo project
+7
+6	Blended (Hướng dẫn + Tự thực hành)	Bài 6: Lập trình đăng nhập	Syllabus, Source Code Sample	Code giao diện và logic đăng nhập (JavaFX)	Source Code Template	Hướng dẫn code đăng nhập, xác thực
+8
+7	Blended (Hướng dẫn + Tự thực hành)	Bài 7: Lập trình quản lý sản phẩm	Syllabus, Source Code Sample	Code giao diện và CRUD sản phẩm	Source Code Template	Hướng dẫn code CRUD, kết nối SQL
+9
+8	Blended (Hướng dẫn + Tự thực hành)	Bài 8: Lập trình nhập	Syllabus, Source Code Sample	Code logic nhập kho	Source Code Template	Hướng dẫn code nhập/xuất, kiểm tra logic
+10
+9	Blended (Hướng dẫn + Tự thực hành)	Bài 9: Lập trình nhập xuất kho	Syllabus, Source Code Sample	Code logic xuất kho	Source Code Template	Hướng dẫn code nhập/xuất, kiểm tra logic
+11
+10	Blended (Hướng dẫn + Tự thực hành)	Bài 10: Lập trình nhập chuyển kho, kiểm kho, cân bằng kho	Syllabus, Source Code Sample	Code logic chuyển kho, kiểm kho, cân bằng kho	Source Code Template	Hướng dẫn code nhập/xuất, kiểm tra logic
+12
+11	Blended (Hướng dẫn + Tự thực hành)	Bài 11: Kiểm thử và báo cáo cơ bản	Syllabus, Testing Guide, Source Code Sample	Viết Unit Test (JUnit), code báo cáo tồn kho	Testing Template	Hướng dẫn kiểm thử, code báo cáo
+13
+12	Kiểm tra, viết báo cáo thu hoạch	Bài 12: Viết báo cáo	Project document	- Sinh viên trình bày kết quả cuối cùng	Project document	- Gợi ý các tính năng nâng cao
+- Giảng viên hướng dẫn sv viết báo cáo khi sinh viên hoàn thành kết quả cuối cùng và đánh giá kết quả

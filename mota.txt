@@ -1,0 +1,94 @@
+1
+No	Title	Details
+2
+1	Document type	SYLLABUS
+3
+2	Program	Xây dựng hệ thống quản lý Kho hàng nhiều chi nhánh với Java
+4
+3	Decision No.
+5
+4	Course Name	Xây dựng hệ thống quản lý Kho hàng nhiều chi nhánh với Java
+6
+5	Course Name English	Building a multi-branch warehouse management system using Java technology
+7
+6	Course Code
+8
+7	Leaning-Teaching Method	Traditional
+9
+8	Level Project	2
+10
+9	Degree Level	Cao đẳng
+11
+10	Time Allocation	Tổng thời lượng: 24 giờ
+1. Hướng dẫn: 10 giờ
+2. Tự thực hành: 12 giờ
+3. Giờ kiểm tra, viết báo cáo thu hoạch: 2 giờ"
+12
+11	Pre-requisite	COM201, PRO104, SOF203, SOF301, SOF302, SOF306, PMA101, SOF303
+13
+12	Description	Mục tiêu
+- Nắm cơ bản quy trình phát triển phần mềm (phân tích, thiết kế, lập trình, kiểm thử).
+- Hiểu nghiệp vụ quản lý kho: quản lý người dùng, sản phẩm, nhập/xuất kho, tồn kho.
+- Rèn kỹ năng lập trình Java, kết nối MySQL/PostgreSQL, và xây dựng giao diện JavaFX.
+- Phát triển kỹ năng làm việc nhóm theo quy trình Agile/Scrum cơ bản.
+Hình thức thực hiện
+- Tổ chức lớp học có hướng dẫn:
+- Kết hợp lý thuyết (30%) và thực hành (70%), sử dụng phương pháp "Tích hợp (Hướng dẫn + Tự thực hành)".
+- Giảng viên cung cấp tài liệu (Syllabus, Slide, Template) và mã nguồn mẫu.
+- Hỗ trợ qua email, nhóm chat (Zalo/Teams), hoặc Q&A trực tuyến.
+- Rèn luyện kỹ năng phân tích và thiết kế:
+- Sinh viên vẽ Use Case, ERD, Wireframe đơn giản.
+- Sinh viên yếu: Mô tả Use Case hoặc vẽ Wireframe cơ bản.
+- Sinh viên trung bình: Vẽ ERD hoặc Activity Diagram.
+- Sinh viên giỏi: Chuẩn hóa ERD hoặc tối ưu thiết kế.
+- Rèn luyện kỹ năng lập trình:
+- Sinh viên lập trình module đăng nhập, quản lý sản phẩm, nhập/xuất kho, báo cáo cơ bản.
+- Sinh viên yếu: Code giao diện hoặc CRUD đơn giản.
+- Sinh viên trung bình: Code logic nhập/xuất kho.
+- Sinh viên giỏi: Tối ưu truy vấn SQL hoặc giao diện.
+- Sinh viên làm việc nhóm:
+- Nhóm 3–5 sinh viên với vai trò (Scrum Master, Developer, Tester, Documenter).
+- Quy trình Agile/Scrum:
+- Sprint: 1 tuần, cập nhật Backlog trên Trello.
+- Daily Scrum: Họp 10 phút/ngày.
+- Sprint Review: Đánh giá với giảng viên.
+- Phân vai trò:
+- Sinh viên yếu: Documenter hoặc Tester.
+- Sinh viên trung bình: Developer (code cơ bản).
+- Sinh viên giỏi: Scrum Master hoặc Developer (logic nâng cao).
+- Đánh giá: Nộp Worklog cá nhân ghi công việc và thời gian.
+14
+13	Student's task	- Phân tích yêu cầu nghiệp vụ
+- Thiết kế hệ thống phần mềm
+- Xây dựng và lập trình hệ thống
+- Kiểm thử hệ thống
+- Làm việc nhóm và quản lý tiến độ
+- Hoàn thiện, báo cáo và thuyết trình sản phẩm
+15
+14	Tools	1. Công cụ phát triển phần mềm
+Eclipse IDE (cho Java) hoặc IntelliJ IDEA Community Edition
+Maven hoặc Gradle (quản lý thư viện cho Java)
+2. Cơ sở dữ liệu
+PostgreSQL hoặc MySQL (kết hợp với Java)
+3. Công cụ thiết kế hệ thống
+Draw.io, Lucidchart hoặc StarUML (vẽ sơ đồ Use Case, ERD, Sequence Diagram, Activity Diagram...)
+4. Quản lý mã nguồn
+Git (version control)
+GitHub / GitLab (lưu trữ, quản lý project code theo nhóm)
+5. Công cụ quản lý dự án
+Trello (quản lý công việc theo bảng Kanban)
+Jira (quản lý task chi tiết - tuỳ chọn nếu cần chuyên nghiệp hơn)
+6. Công cụ kiểm thử
+Postman (kiểm thử API - nếu có phát triển API)
+7. Công cụ bổ trợ khác
+Swagger UI (tài liệu hóa API nếu có phát triển API backend)
+16
+15	Note	1. Điều kiện đạt
+- Tỷ lệ tham gia buổi học trên 50%
+- Điểm đánh giá cuối dự án tối thiểu là 5 (đạt)
+17
+16	Min GPA to pass	5
+18
+17	Scoring scale	10
+19
+18	Approved date

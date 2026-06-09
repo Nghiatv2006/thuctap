@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox prefHeight="750.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.project.controller.MainController"
+      style="-fx-background-color: #f8fafc; -fx-font-family: 'Segoe UI';">
+
+    <!-- ========================================================================= -->
+    <!-- SIDEBAR (Bên trái) -->
+    <!-- ========================================================================= -->
+    <VBox prefWidth="280.0" minWidth="280.0" maxWidth="280.0" spacing="10.0" 
+          style="-fx-background-color: #0f172a; -fx-padding: 20px;">
+        
+        <!-- User Profile Summary -->
+        <VBox spacing="5.0" style="-fx-border-color: rgba(255, 255, 255, 0.1); -fx-border-width: 0 0 1 0; -fx-padding: 0 0 15px 0;">
+            <Label fx:id="profileNameLabel" text="Họ tên người dùng" 
+                   style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px;"/>
+            <Label fx:id="profileRoleLabel" text="Vai trò: ADMIN" 
+                   style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
+            <Label fx:id="profileBranchLabel" text="Chi nhánh: Tất cả" 
+                   style="-fx-text-fill: #3b82f6; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+        </VBox>
+
+        <!-- Navigation Buttons -->
+        <VBox spacing="8.0" VBox.vgrow="ALWAYS">
+            <Button fx:id="navDashboardBtn" text="📋 Tồn kho &amp; Tổng quan" onAction="#showDashboardPanel" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                    style="-fx-background-color: #1e293b; -fx-text-fill: white; -fx-padding: 12px 15px; -fx-background-radius: 5px; -fx-cursor: hand; -fx-font-weight: bold;"/>
+            
+            <Button fx:id="navProductBtn" text="📦 Quản lý Sản phẩm" onAction="#showProductPanel" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                    style="-fx-background-color: transparent; -fx-text-fill: #cbd5e1; -fx-padding: 12px 15px; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+            
+            <Button fx:id="navReceiptBtn" text="📝 Lập Phiếu Nhập/Xuất/Chuyển" onAction="#showReceiptPanel" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                    style="-fx-background-color: transparent; -fx-text-fill: #cbd5e1; -fx-padding: 12px 15px; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+            
+            <Button fx:id="navHistoryBtn" text="📜 Lịch sử Giao dịch" onAction="#showHistoryPanel" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                    style="-fx-background-color: transparent; -fx-text-fill: #cbd5e1; -fx-padding: 12px 15px; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+            
+            <Button fx:id="navUserBtn" text="👥 Quản lý Thành viên" onAction="#showUserPanel" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                    style="-fx-background-color: transparent; -fx-text-fill: #cbd5e1; -fx-padding: 12px 15px; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+        </VBox>
+
+        <!-- Logout Button -->
+        <Button text="🚪 ĐĂNG XUẤT" onAction="#handleLogout" maxWidth="Infinity"
+                style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-padding: 12px; -fx-background-radius: 5px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+    </VBox>
+
+    <!-- ========================================================================= -->
+    <!-- CONTENT AREA (Bên phải) -->
+    <!-- ========================================================================= -->
+    <VBox HBox.hgrow="ALWAYS" spacing="20.0" style="-fx-padding: 25px;">
+        
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15px 20px; -fx-background-radius: 8px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 1);">
+            <Label fx:id="headerTitleLabel" text="Tồn kho &amp; Tổng quan hệ thống" 
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+        </HBox>
+
+        <!-- Dynamic Panels Holder -->
+        <StackPane VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 8px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 1); -fx-padding: 20px;">
+            
+            <!-- 1. DASHBOARD / STOCK PANEL -->
+            <VBox fx:id="dashboardPanel" spacing="15.0">
+                <!-- Filter Section -->
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <Label text="Lọc theo Chi nhánh:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                    <ComboBox fx:id="dashBranchFilter" onAction="#handleDashBranchFilter" prefWidth="180.0" promptText="Chọn chi nhánh..."/>
+                    <Label text="Tìm kiếm tồn kho:" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-padding: 0 0 0 10px;"/>
+                    <TextField fx:id="dashSearchField" onKeyReleased="#handleDashSearch" prefWidth="220.0" promptText="Nhập mã hoặc tên sản phẩm..."/>
+                    <Button text="⚙ Thiết lập cảnh báo" onAction="#showSettingsPopup" 
+                            style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 6px 12px;"/>
+                    <Button text="⚖ Cân bằng kho" onAction="#showInventoryAuditDialog" 
+                            style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 6px 12px; -fx-background-radius: 4px;"/>
+                </HBox>
+                
+                <!-- Inventory Table -->
+                <TableView fx:id="inventoryTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colInvBranch" prefWidth="150.0" text="Chi nhánh"/>
+                        <TableColumn fx:id="colInvProductCode" prefWidth="100.0" text="Mã sản phẩm"/>
+                        <TableColumn fx:id="colInvProductName" prefWidth="200.0" text="Tên sản phẩm"/>
+                        <TableColumn fx:id="colInvCategory" prefWidth="150.0" text="Danh mục"/>
+                        <TableColumn fx:id="colInvQuantity" prefWidth="90.0" text="Số lượng tồn"/>
+                        <TableColumn fx:id="colInvUnit" prefWidth="80.0" text="Đơn vị"/>
+                        <TableColumn fx:id="colInvMfgDate" prefWidth="110.0" text="NSX"/>
+                        <TableColumn fx:id="colInvExpDate" prefWidth="110.0" text="HSD"/>
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <!-- 2. PRODUCT CRUD PANEL -->
+            <VBox fx:id="productPanel" spacing="15.0" visible="false">
+                <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+                    <!-- Left: Product List Table -->
+                    <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                        <HBox spacing="10.0" alignment="CENTER_LEFT">
+                            <TextField fx:id="prodSearchField" onKeyReleased="#handleProdSearch" prefWidth="300.0" promptText="Tìm sản phẩm theo tên hoặc mã..."/>
+                        </HBox>
+                        <TableView fx:id="productTable" VBox.vgrow="ALWAYS" onMouseClicked="#handleSelectProduct">
+                            <columns>
+                                <TableColumn fx:id="colProdCode" prefWidth="90.0" text="Mã SKU"/>
+                                <TableColumn fx:id="colProdName" prefWidth="180.0" text="Tên sản phẩm"/>
+                                <TableColumn fx:id="colProdCategory" prefWidth="120.0" text="Danh mục"/>
+                                <TableColumn fx:id="colProdUnit" prefWidth="70.0" text="Đơn vị"/>
+                                <TableColumn fx:id="colProdPrice" prefWidth="110.0" text="Giá bán (VND)"/>
+                                <TableColumn fx:id="colProdMfgDate" prefWidth="100.0" text="NSX"/>
+                                <TableColumn fx:id="colProdExpDate" prefWidth="100.0" text="HSD"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                    
+                    <!-- Right: Editor Form -->
+                    <VBox fx:id="prodEditorForm" spacing="12.0" prefWidth="320.0" 
+                          style="-fx-background-color: #f8fafc; -fx-padding: 15px; -fx-background-radius: 5px; -fx-border-color: #e2e8f0; -fx-border-radius: 5px;">
+                        <Label text="Thông Tin Sản Phẩm" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1e293b;"/>
+                        
+                        <VBox spacing="4.0">
+                            <Label text="Mã SKU" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <TextField fx:id="txtProdCode"/>
+                        </VBox>
+                        <VBox spacing="4.0">
+                            <Label text="Tên sản phẩm" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <TextField fx:id="txtProdName"/>
+                        </VBox>
+                        <VBox spacing="4.0">
+                            <Label text="Đơn vị tính" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <TextField fx:id="txtProdUnit" promptText="Ví dụ: Cái, Thùng..."/>
+                        </VBox>
+                        <VBox spacing="4.0">
+                            <Label text="Giá quy chiếu (VND)" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <TextField fx:id="txtProdPrice" promptText="Ví dụ: 255000"/>
+                        </VBox>
+                        <VBox spacing="4.0">
+                            <Label text="Danh mục" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <ComboBox fx:id="cbProdCategory" maxWidth="Infinity"/>
+                        </VBox>
+                        
+                        <VBox spacing="6.0" style="-fx-padding: 5px 0 0 0;">
+                            <CheckBox fx:id="chkHasExpiry" text="Hàng có hạn sử dụng (NSX/HSD)" onAction="#handleExpiryCheckChange" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        </VBox>
+                        <VBox fx:id="mfgDateBox" spacing="4.0" visible="false" managed="false">
+                            <Label text="Ngày sản xuất (NSX)" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <DatePicker fx:id="dpMfgDate" maxWidth="Infinity" promptText="Chọn ngày..."/>
+                        </VBox>
+                        <VBox fx:id="expDateBox" spacing="4.0" visible="false" managed="false">
+                            <Label text="Hạn sử dụng (HSD)" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <DatePicker fx:id="dpExpDate" maxWidth="Infinity" promptText="Chọn ngày..."/>
+                        </VBox>
+                        
+                        <Label fx:id="prodErrorLabel" text="" style="-fx-text-fill: #ef4444; -fx-font-size: 11px;" visible="false" managed="false"/>
+
+                        <HBox spacing="10.0" style="-fx-padding: 10px 0 0 0;">
+                            <Button fx:id="btnProdAdd" text="Thêm" onAction="#handleProductAdd" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #22c55e; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            <Button fx:id="btnProdUpdate" text="Sửa" onAction="#handleProductUpdate" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            <Button fx:id="btnProdDelete" text="Xóa" onAction="#handleProductDelete" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        </HBox>
+                        <Button text="Làm mới form" onAction="#handleProductClearForm" maxWidth="Infinity" style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-cursor: hand;"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- 3. CREATE TRANSACTION / RECEIPT PANEL -->
+            <VBox fx:id="receiptPanel" spacing="15.0" visible="false">
+                <!-- Top Section: Receipt Type & Branches Info -->
+                <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-background-color: #f8fafc; -fx-padding: 15px; -fx-background-radius: 5px; -fx-border-color: #e2e8f0;">
+                    <VBox spacing="4.0">
+                        <Label text="Loại phiếu" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <ComboBox fx:id="cbReceiptType" onAction="#handleReceiptTypeChange" prefWidth="150.0"/>
+                    </VBox>
+                    <VBox spacing="4.0">
+                        <Label text="Mã phiếu (Tự động/Nhập)" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <TextField fx:id="txtReceiptCode" prefWidth="150.0" promptText="Ví dụ: PN-0002"/>
+                    </VBox>
+                    <VBox spacing="4.0">
+                        <Label text="Kho xuất (Source Branch)" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <ComboBox fx:id="cbReceiptSrcBranch" onAction="#handleReceiptSrcBranchChange" prefWidth="180.0"/>
+                    </VBox>
+                    <VBox spacing="4.0">
+                        <Label text="Kho nhận (Dest Branch)" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <ComboBox fx:id="cbReceiptDestBranch" prefWidth="180.0"/>
+                    </VBox>
+                    <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                        <Label text="Ghi chú / Lý do" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <TextField fx:id="txtReceiptDesc" promptText="Nhập ghi chú hoặc lý do (tùy chọn)..." maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Middle Section: Add items to current receipt draft -->
+                <VBox spacing="8.0" style="-fx-background-color: #f1f5f9; -fx-padding: 10px; -fx-background-radius: 5px;">
+                    <HBox spacing="10.0" alignment="BOTTOM_LEFT">
+                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                            <Label text="Chọn sản phẩm" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <ComboBox fx:id="cbReceiptProduct" onAction="#handleReceiptProductSelect" maxWidth="Infinity" promptText="Chọn sản phẩm..."/>
+                        </VBox>
+                        <VBox spacing="4.0" prefWidth="90.0">
+                            <Label text="Đơn vị" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextField fx:id="txtReceiptUnit" editable="false" style="-fx-background-color: #e2e8f0;"/>
+                        </VBox>
+                        <VBox spacing="4.0" prefWidth="90.0">
+                            <Label text="Số lượng" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextField fx:id="txtReceiptQty" promptText="Số lượng"/>
+                        </VBox>
+                        <VBox spacing="4.0" prefWidth="140.0">
+                            <Label text="Đơn giá (VND)" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextField fx:id="txtReceiptPrice" promptText="Giá"/>
+                        </VBox>
+                        <Button text="Thêm dòng" onAction="#handleReceiptAddDetail" prefHeight="35.0" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    </HBox>
+                    <!-- NSX/HSD Row (hiện khi sản phẩm có hạn sử dụng) -->
+                    <HBox spacing="15.0" alignment="CENTER_LEFT">
+                        <CheckBox fx:id="chkReceiptHasExpiry" text="Chỉ định NSX / HSD theo lô" onAction="#handleReceiptExpiryCheckChange" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <VBox fx:id="receiptMfgDateBox" spacing="2.0" visible="false" managed="false">
+                            <Label text="Ngày sản xuất (NSX)" style="-fx-text-fill: #475569; -fx-font-size: 11px;"/>
+                            <DatePicker fx:id="dpReceiptMfgDate" prefWidth="140.0" promptText="Chọn ngày..."/>
+                        </VBox>
+                        <VBox fx:id="receiptExpDateBox" spacing="2.0" visible="false" managed="false">
+                            <Label text="Hạn sử dụng (HSD)" style="-fx-text-fill: #475569; -fx-font-size: 11px;"/>
+                            <DatePicker fx:id="dpReceiptExpDate" prefWidth="140.0" promptText="Chọn ngày..."/>
+                        </VBox>
+                        <Label fx:id="lblReceiptAvailStock" text="" style="-fx-text-fill: #0284c7; -fx-font-size: 12px; -fx-font-weight: bold;" visible="false" managed="false"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Draft Table -->
+                <Label text="Chi tiết phiếu hiện tại (Dự thảo):" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                <TableView fx:id="receiptDraftTable" VBox.vgrow="ALWAYS" prefHeight="250.0">
+                    <columns>
+                        <TableColumn fx:id="colDraftCode" prefWidth="100.0" text="Mã SKU"/>
+                        <TableColumn fx:id="colDraftName" prefWidth="250.0" text="Tên sản phẩm"/>
+                        <TableColumn fx:id="colDraftQty" prefWidth="100.0" text="Số lượng"/>
+                        <TableColumn fx:id="colDraftPrice" prefWidth="120.0" text="Đơn giá (VND)"/>
+                        <TableColumn fx:id="colDraftTotal" prefWidth="120.0" text="Thành tiền"/>
+                        <TableColumn fx:id="colDraftMfgDate" prefWidth="110.0" text="NSX"/>
+                        <TableColumn fx:id="colDraftExpDate" prefWidth="110.0" text="HSD"/>
+                    </columns>
+                </TableView>
+
+                <!-- Action Button & Total -->
+                <HBox alignment="CENTER_RIGHT" spacing="20.0">
+                    <Label fx:id="lblReceiptTotalSum" text="Tổng tiền: 0 VND" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <Button text="Xóa dòng chọn" onAction="#handleReceiptRemoveDetail" style="-fx-background-color: #94a3b8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    <Button text="XÁC NHẬN LẬP PHIẾU" onAction="#handleReceiptConfirm" style="-fx-background-color: #22c55e; -fx-text-fill: white; -fx-padding: 10px 20px; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand;"/>
+                </HBox>
+            </VBox>
+
+            <!-- 4. TRANSACTION HISTORY PANEL -->
+            <VBox fx:id="historyPanel" spacing="15.0" visible="false">
+                <VBox spacing="10.0" style="-fx-background-color: #f8fafc; -fx-padding: 12px; -fx-background-radius: 5px; -fx-border-color: #cbd5e1; -fx-border-width: 0 0 1 0;">
+                    <!-- Hàng 1: Loại phiếu, Kho xuất, Kho nhận, Người lập -->
+                    <HBox spacing="15.0" alignment="CENTER_LEFT">
+                        <Label text="Loại phiếu:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <ComboBox fx:id="histTypeFilter" onAction="#handleHistFilter" prefWidth="120.0"/>
+                        
+                        <Label text="Kho xuất:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <ComboBox fx:id="histSrcFilter" onAction="#handleHistFilter" prefWidth="160.0"/>
+                        
+                        <Label text="Kho nhận:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <ComboBox fx:id="histDestFilter" onAction="#handleHistFilter" prefWidth="160.0"/>
+                        
+                        <Label text="Người lập:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <ComboBox fx:id="histUserFilter" onAction="#handleHistFilter" prefWidth="180.0" promptText="Chọn người lập..."/>
+                    </HBox>
+                    
+                    <!-- Hàng 2: Bộ lọc ngày (Từ ngày... Đến ngày...) và Nút xóa lọc -->
+                    <HBox spacing="15.0" alignment="CENTER_LEFT">
+                        <Label text="Từ ngày:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <DatePicker fx:id="histStartDatePicker" onAction="#handleHistFilter" prefWidth="140.0" promptText="Từ ngày..."/>
+                        
+                        <Label text="Đến ngày:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <DatePicker fx:id="histEndDatePicker" onAction="#handleHistFilter" prefWidth="140.0" promptText="Đến ngày..."/>
+                        
+                        <Button text="Xóa bộ lọc" onAction="#handleClearHistFilter" style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 6px 15px; -fx-font-weight: bold;"/>
+                    </HBox>
+                </VBox>
+                <TableView fx:id="historyTable" VBox.vgrow="ALWAYS" onMouseClicked="#handleSelectHistoryReceipt">
+                    <columns>
+                        <TableColumn fx:id="colHistCode" prefWidth="120.0" text="Mã phiếu"/>
+                        <TableColumn fx:id="colHistType" prefWidth="120.0" text="Loại giao dịch"/>
+                        <TableColumn fx:id="colHistSrc" prefWidth="160.0" text="Kho xuất"/>
+                        <TableColumn fx:id="colHistDest" prefWidth="160.0" text="Kho nhận"/>
+                        <TableColumn fx:id="colHistUser" prefWidth="140.0" text="Người lập"/>
+                        <TableColumn fx:id="colHistDate" prefWidth="150.0" text="Ngày tạo"/>
+                        <TableColumn fx:id="colHistDesc" prefWidth="250.0" text="Lý do / Ghi chú" style="-fx-wrap-text: true;"/>
+                    </columns>
+                </TableView>
+                
+                <Label text="Chi tiết phiếu đã chọn:" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                <TableView fx:id="historyDetailTable" prefHeight="200.0">
+                    <columns>
+                        <TableColumn fx:id="colHistDetCode" prefWidth="100.0" text="Mã SKU"/>
+                        <TableColumn fx:id="colHistDetName" prefWidth="240.0" text="Tên sản phẩm"/>
+                        <TableColumn fx:id="colHistDetQty" prefWidth="90.0" text="Số lượng"/>
+                        <TableColumn fx:id="colHistDetPrice" prefWidth="140.0" text="Giá giao dịch (VND)"/>
+                        <TableColumn fx:id="colHistDetMfgDate" prefWidth="110.0" text="NSX"/>
+                        <TableColumn fx:id="colHistDetExpDate" prefWidth="110.0" text="HSD"/>
+                    </columns>
+                </TableView>
+
+                <!-- Ghi chú phiếu — hiển thị đầy đủ khi chọn một phiếu trong lịch sử -->
+                <HBox spacing="10.0" alignment="CENTER_LEFT" style="-fx-background-color: #f8fafc; -fx-padding: 10px 12px; -fx-background-radius: 6px; -fx-border-color: #e2e8f0; -fx-border-radius: 6px;">
+                    <Label text="📝 Ghi chú phiếu:" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-min-width: 110px;"/>
+                    <TextArea fx:id="txtHistDesc" editable="false" prefRowCount="2" wrapText="true" HBox.hgrow="ALWAYS"
+                              promptText="(Chọn một phiếu ở trên để xem ghi chú)"
+                              style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-background-radius: 4px; -fx-font-size: 13px;"/>
+                </HBox>
+            </VBox>
+
+            <!-- 5. USER MANAGEMENT PANEL (Chỉ dành cho Admin) -->
+            <VBox fx:id="userPanel" spacing="15.0" visible="false">
+                <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+                    <!-- Left: User List Table -->
+                    <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                        <!-- Thanh tìm kiếm + bộ lọc vai trò, chi nhánh, trạng thái -->
+                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                            <!-- Hàng 1: Tìm kiếm + lọc vai trò -->
+                            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                <TextField fx:id="userSearchField" onKeyReleased="#handleUserSearch" prefWidth="260.0" promptText="Tìm theo tên hoặc username..."/>
+                                <Label text="Vai trò:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                                <ComboBox fx:id="userRoleFilter" onAction="#handleUserFilter" prefWidth="130.0"/>
+                                <Button text="↺ Xóa lọc" onAction="#handleUserClearFilter" style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 6px 14px; -fx-font-weight: bold; -fx-background-radius: 4px;"/>
+                            </HBox>
+                            <!-- Hàng 2: Lọc chi nhánh + trạng thái -->
+                            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                <Label text="Chi nhánh:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                                <ComboBox fx:id="userBranchFilter" onAction="#handleUserFilter" prefWidth="200.0"/>
+                                <Label text="Trạng thái:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                                <ComboBox fx:id="userStatusFilter" onAction="#handleUserFilter" prefWidth="130.0"/>
+                            </HBox>
+                        </VBox>
+                        <TableView fx:id="userTable" VBox.vgrow="ALWAYS" onMouseClicked="#handleSelectUser">
+                            <columns>
+                                <TableColumn fx:id="colUserUsername" prefWidth="120.0" text="Tên đăng nhập"/>
+                                <TableColumn fx:id="colUserFullName" prefWidth="180.0" text="Họ tên"/>
+                                <TableColumn fx:id="colUserRole" prefWidth="100.0" text="Vai trò"/>
+                                <TableColumn fx:id="colUserBranch" prefWidth="180.0" text="Chi nhánh"/>
+                                <TableColumn fx:id="colUserStatus" prefWidth="120.0" text="Trạng thái"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                    
+                    <!-- Right: Editor Form -->
+                    <VBox fx:id="userEditorForm" spacing="12.0" prefWidth="340.0" 
+                          style="-fx-background-color: #f8fafc; -fx-padding: 15px; -fx-background-radius: 5px; -fx-border-color: #e2e8f0; -fx-border-radius: 5px;">
+                        <Label text="Thông Tin Thành Viên" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1e293b;"/>
+                        
+                        <VBox spacing="4.0">
+                            <Label text="Tên đăng nhập (Username)" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <TextField fx:id="txtUserUsername" promptText="ví dụ: hung_nv"/>
+                        </VBox>
+                        <VBox spacing="4.0">
+                            <Label text="Mật khẩu (Chỉ nhập khi thêm mới/đổi mật khẩu)" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <PasswordField fx:id="txtUserPassword" promptText="Nhập mật khẩu..."/>
+                        </VBox>
+                        <VBox spacing="4.0">
+                            <Label text="Họ và tên" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <TextField fx:id="txtUserFullName" promptText="ví dụ: Nguyễn Văn Hùng"/>
+                        </VBox>
+                        <VBox spacing="4.0">
+                            <Label text="Vai trò" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <ComboBox fx:id="cbUserRole" maxWidth="Infinity"/>
+                        </VBox>
+                        <VBox spacing="4.0">
+                            <Label text="Chi nhánh làm việc" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <ComboBox fx:id="cbUserBranch" maxWidth="Infinity" promptText="Không có (Admin)"/>
+                        </VBox>
+                        <VBox spacing="4.0">
+                            <Label text="Trạng thái tài khoản" style="-fx-text-fill: #475569; -fx-font-size: 12px;"/>
+                            <ComboBox fx:id="cbUserStatus" maxWidth="Infinity"/>
+                        </VBox>
+                        
+                        <Label fx:id="userErrorLabel" text="" style="-fx-text-fill: #ef4444; -fx-font-size: 11px;" visible="false" managed="false"/>
+ 
+                        <HBox spacing="10.0" style="-fx-padding: 10px 0 0 0;">
+                            <Button fx:id="btnUserAdd" text="Thêm mới" onAction="#handleUserAdd" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #22c55e; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            <Button fx:id="btnUserUpdate" text="Cập nhật" onAction="#handleUserUpdate" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        </HBox>
+                        <HBox spacing="10.0">
+                            <Button fx:id="btnUserToggleLock" text="Khóa / Mở" onAction="#handleUserToggleLock" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #eab308; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            <Button fx:id="btnUserDelete" text="Xóa" onAction="#handleUserDelete" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        </HBox>
+                        <Button text="Làm mới form" onAction="#handleUserClearForm" maxWidth="Infinity" style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-cursor: hand;"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+        </StackPane>
+    </VBox>
+</HBox>
