@@ -32,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 @Component
@@ -193,6 +194,29 @@ public class MainController {
     private ObservableList<User> masterUserList = FXCollections.observableArrayList();
 
     // =========================================================================
+    // FXML COMPONENTS - 6. BRANCH MANAGEMENT PANEL (chỉ ADMIN)
+    // =========================================================================
+    @FXML private Button navBranchBtn;
+    @FXML private VBox branchPanel;
+
+    @FXML private TextField branchSearchField;
+    @FXML private TableView<Branch> branchTable;
+    @FXML private TableColumn<Branch, String> colBranchName;
+    @FXML private TableColumn<Branch, String> colBranchAddress;
+    @FXML private TableColumn<Branch, Integer> colBranchThreshold;
+
+    @FXML private VBox branchEditorForm;
+    @FXML private TextField txtBranchName;
+    @FXML private TextField txtBranchAddress;
+    @FXML private TextField txtBranchThreshold;
+    @FXML private Label branchErrorLabel;
+    @FXML private Button btnBranchAdd;
+    @FXML private Button btnBranchUpdate;
+    @FXML private Button btnBranchDelete;
+
+    private ObservableList<Branch> masterBranchList = FXCollections.observableArrayList();
+
+    // =========================================================================
     // SPRING SERVICES & DATA LISTS
     // =========================================================================
     private final BranchService branchService;
@@ -204,6 +228,7 @@ public class MainController {
 
     private User currentUser;
     private int lowStockThreshold = 5;
+    private static final String PREF_GLOBAL_THRESHOLD = "globalLowStockThreshold";
     private ObservableList<Inventory> masterInventoryList = FXCollections.observableArrayList();
     private ObservableList<Product> masterProductList = FXCollections.observableArrayList();
     private ObservableList<ReceiptDetail> draftDetails = FXCollections.observableArrayList();
@@ -238,7 +263,9 @@ public class MainController {
             lowStockThreshold = currentUser.getBranch().getLowStockThreshold() != null ? currentUser.getBranch().getLowStockThreshold() : 5;
         } else {
             profileBranchLabel.setText("Chi nhánh: Tất cả");
-            lowStockThreshold = 5;
+            // Admin: load ngưỡng cảnh báo toàn cục từ Preferences (persistent giữa các phiên)
+            Preferences prefs = Preferences.userNodeForPackage(MainController.class);
+            lowStockThreshold = prefs.getInt(PREF_GLOBAL_THRESHOLD, 5);
         }
 
         // 2. Cấu hình các bảng hiển thị
@@ -498,6 +525,13 @@ public class MainController {
             };
             return cell;
         });
+
+        // H. Bảng Quản Lý Chi Nhánh
+        colBranchName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
+        colBranchAddress.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getAddress()));
+        colBranchThreshold.setCellValueFactory(data -> new SimpleObjectProperty<>(
+                data.getValue().getLowStockThreshold() != null ? data.getValue().getLowStockThreshold() : 5));
+        branchTable.setItems(masterBranchList);
     }
 
     private void loadInitialData() {
@@ -596,21 +630,59 @@ public class MainController {
 
         // Nạp danh sách người dùng ban đầu
         masterUserList.setAll(userService.getAllUsers());
+
+        // Nạp danh sách chi nhánh ban đầu (panel Quản lý Chi nhánh)
+        masterBranchList.setAll(branches);
     }
 
     private void applyRoleAuthorization() {
-        // Chỉ ADMIN mới được xem Quản lý Thành viên
-        if (!"ADMIN".equals(currentUser.getRole())) {
+        String role = currentUser.getRole();
+
+        // Quản lý Chi nhánh: chỉ ADMIN
+        if (!"ADMIN".equals(role)) {
+            navBranchBtn.setVisible(false);
+            navBranchBtn.setManaged(false);
+        }
+
+        // Quản lý Thành viên: ADMIN (toàn quyền) + MANAGER (giới hạn STAFF cùng chi nhánh)
+        if ("STAFF".equals(role)) {
             navUserBtn.setVisible(false);
             navUserBtn.setManaged(false);
         }
 
-        // Nhân viên (STAFF) không được thực hiện CRUD Sản Phẩm
-        if ("STAFF".equals(currentUser.getRole())) {
+        // STAFF không được CRUD Sản Phẩm
+        if ("STAFF".equals(role)) {
             btnProdAdd.setDisable(true);
             btnProdUpdate.setDisable(true);
             btnProdDelete.setDisable(true);
-            prodEditorForm.setDisable(true); // Vô hiệu hóa form editor sản phẩm
+            prodEditorForm.setDisable(true);
+        }
+
+        // MANAGER trong panel User: chỉ thấy STAFF cùng chi nhánh, role bị khóa = STAFF, branch khóa
+        if ("MANAGER".equals(role)) {
+            cbUserRole.setItems(FXCollections.observableArrayList("STAFF"));
+            cbUserRole.getSelectionModel().selectFirst();
+            cbUserRole.setDisable(true);
+
+            if (currentUser.getBranch() != null) {
+                cbUserBranch.setItems(FXCollections.observableArrayList(currentUser.getBranch()));
+                cbUserBranch.getSelectionModel().selectFirst();
+            }
+            cbUserBranch.setDisable(true);
+
+            // Bộ lọc panel User: ẩn các tùy chọn không liên quan với manager
+            ObservableList<Object> roleFilterOpts = FXCollections.observableArrayList("Tất cả", "STAFF");
+            userRoleFilter.setItems(roleFilterOpts);
+            userRoleFilter.getSelectionModel().selectFirst();
+            userRoleFilter.setDisable(true);
+
+            if (currentUser.getBranch() != null) {
+                ObservableList<Object> branchFilterOpts = FXCollections.observableArrayList();
+                branchFilterOpts.add(currentUser.getBranch());
+                userBranchFilter.setItems(branchFilterOpts);
+                userBranchFilter.getSelectionModel().selectFirst();
+            }
+            userBranchFilter.setDisable(true);
         }
     }
 
@@ -624,6 +696,7 @@ public class MainController {
         receiptPanel.setVisible(false);
         historyPanel.setVisible(false);
         userPanel.setVisible(false);
+        branchPanel.setVisible(false);
 
         activePanel.setVisible(true);
         headerTitleLabel.setText(title);
@@ -634,6 +707,7 @@ public class MainController {
         navReceiptBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #cbd5e1; -fx-padding: 12px 15px; -fx-background-radius: 5px; -fx-cursor: hand;");
         navHistoryBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #cbd5e1; -fx-padding: 12px 15px; -fx-background-radius: 5px; -fx-cursor: hand;");
         navUserBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #cbd5e1; -fx-padding: 12px 15px; -fx-background-radius: 5px; -fx-cursor: hand;");
+        navBranchBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #cbd5e1; -fx-padding: 12px 15px; -fx-background-radius: 5px; -fx-cursor: hand;");
 
         // Set active style
         activeBtn.setStyle("-fx-background-color: #1e293b; -fx-text-fill: white; -fx-padding: 12px 15px; -fx-background-radius: 5px; -fx-cursor: hand; -fx-font-weight: bold;");
@@ -666,7 +740,12 @@ public class MainController {
 
     @FXML void showUserPanel(ActionEvent event) {
         switchPanel(userPanel, navUserBtn, "Quản lý Thành viên");
-        masterUserList.setAll(userService.getAllUsers());
+        refreshUserListForRole();
+    }
+
+    @FXML void showBranchPanel(ActionEvent event) {
+        switchPanel(branchPanel, navBranchBtn, "Quản lý Chi nhánh");
+        refreshBranchList();
     }
 
     // =========================================================================
@@ -681,12 +760,9 @@ public class MainController {
             lowStockThreshold = b.getLowStockThreshold() != null ? b.getLowStockThreshold() : 5;
             list = inventoryService.getInventoriesByBranch(b);
         } else {
-            if (currentUser != null && currentUser.getBranch() != null) {
-                lowStockThreshold = currentUser.getBranch().getLowStockThreshold() != null ? currentUser.getBranch().getLowStockThreshold() : 5;
-            } else {
-                lowStockThreshold = 5;
-            }
-            list = inventoryService.getAllInventories(); // "Tất cả"
+            // Admin xem "Tất cả chi nhánh": giữ nguyên lowStockThreshold hiện tại
+            // (đã được set từ showSettingsPopup hoặc giá trị mặc định ban đầu)
+            list = inventoryService.getAllInventories();
         }
 
         // Sắp xếp tồn kho theo thời gian cập nhật mới nhất (lastUpdated DESC)
@@ -1125,7 +1201,20 @@ public class MainController {
                 dpReceiptMfgDate.setValue(null);
                 dpReceiptExpDate.setValue(null);
             }
+
+            // Khóa các trường NSX/HSD theo cấu hình của sản phẩm:
+            // - Sản phẩm KHÔNG có HSD → khóa CheckBox để không cho bật.
+            // - Sản phẩm CÓ HSD → khóa cả CheckBox và 2 DatePicker để không cho sửa.
+            chkReceiptHasExpiry.setDisable(true);
+            dpReceiptMfgDate.setDisable(true);
+            dpReceiptExpDate.setDisable(true);
+
             updateAvailableStockDisplay();
+        } else {
+            // Khi clear lựa chọn → mở lại để user thao tác bình thường
+            chkReceiptHasExpiry.setDisable(false);
+            dpReceiptMfgDate.setDisable(false);
+            dpReceiptExpDate.setDisable(false);
         }
     }
 
@@ -1496,8 +1585,11 @@ public class MainController {
                     lowStockThreshold = val;
                     showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã cập nhật ngưỡng tồn kho tối thiểu của chi nhánh " + targetBranch.getName() + " thành " + val + ".");
                 } else {
+                    // Admin xem "Tất cả chi nhánh": lưu vào Preferences để persistent giữa các phiên
                     lowStockThreshold = val;
-                    showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Đang xem tất cả chi nhánh. Ngưỡng cảnh báo tạm thời được đặt là " + val + ".");
+                    Preferences prefs = Preferences.userNodeForPackage(MainController.class);
+                    prefs.putInt(PREF_GLOBAL_THRESHOLD, val);
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã lưu ngưỡng cảnh báo toàn cục là " + val + ".");
                 }
                 inventoryTable.refresh();
             } catch (NumberFormatException e) {
@@ -1771,6 +1863,7 @@ public class MainController {
         }).collect(Collectors.toCollection(FXCollections::observableArrayList));
 
         userTable.setItems(filtered);
+        userTable.refresh();
     }
 
     @FXML
@@ -1984,8 +2077,7 @@ public class MainController {
     }
 
     private void refreshUserListAndFilters() {
-        masterUserList.setAll(userService.getAllUsers());
-        applyUserFilter();
+        refreshUserListForRole();
         
         ObservableList<Object> histUserOptions = FXCollections.observableArrayList();
         histUserOptions.add("Tất cả");
@@ -1997,5 +2089,248 @@ public class MainController {
     private void refreshProductCombobox() {
         List<Product> products = productService.getAllProducts();
         cbReceiptProduct.setItems(FXCollections.observableArrayList(products));
+    }
+
+    // =========================================================================
+    // Refresh User List theo Role (ADMIN = tất cả, MANAGER = STAFF cùng chi nhánh)
+    // =========================================================================
+    private void refreshUserListForRole() {
+        if ("MANAGER".equals(currentUser.getRole())) {
+            // Manager chỉ thấy STAFF cùng chi nhánh
+            List<User> staffOnly = userService.getAllUsers().stream()
+                    .filter(u -> "STAFF".equals(u.getRole()))
+                    .filter(u -> u.getBranch() != null && currentUser.getBranch() != null
+                            && u.getBranch().getId().equals(currentUser.getBranch().getId()))
+                    .collect(Collectors.toList());
+            masterUserList.setAll(staffOnly);
+        } else {
+            masterUserList.setAll(userService.getAllUsers());
+        }
+        applyUserFilter();
+    }
+
+    // =========================================================================
+    // 6. BRANCH MANAGEMENT LOGIC (Admin only)
+    // =========================================================================
+    private void refreshBranchList() {
+        masterBranchList.setAll(branchService.getAllBranches());
+        applyBranchFilter();
+    }
+
+    private void applyBranchFilter() {
+        String keyword = branchSearchField.getText().trim().toLowerCase();
+        ObservableList<Branch> filtered = masterBranchList.stream().filter(b -> {
+            if (!keyword.isEmpty() &&
+                !b.getName().toLowerCase().contains(keyword) &&
+                !b.getAddress().toLowerCase().contains(keyword)) {
+                return false;
+            }
+            return true;
+        }).collect(Collectors.toCollection(FXCollections::observableArrayList));
+        branchTable.setItems(filtered);
+        branchTable.refresh();
+    }
+
+    @FXML
+    void handleBranchSearch() {
+        applyBranchFilter();
+    }
+
+    @FXML
+    void handleBranchClearFilter(ActionEvent event) {
+        branchSearchField.clear();
+        applyBranchFilter();
+    }
+
+    @FXML
+    void handleSelectBranch(MouseEvent event) {
+        Branch selected = branchTable.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            txtBranchName.setText(selected.getName());
+            txtBranchAddress.setText(selected.getAddress());
+            txtBranchThreshold.setText(String.valueOf(
+                    selected.getLowStockThreshold() != null ? selected.getLowStockThreshold() : 5));
+        }
+    }
+
+    @FXML
+    void handleBranchAdd(ActionEvent event) {
+        if (!checkCurrentUserActive()) return;
+        if (!validateBranchForm()) return;
+
+        String name = txtBranchName.getText().trim();
+        // Kiểm tra trùng tên
+        boolean exists = branchService.getAllBranches().stream()
+                .anyMatch(b -> b.getName().equalsIgnoreCase(name));
+        if (exists) {
+            showBranchError("Tên chi nhánh đã tồn tại!");
+            return;
+        }
+
+        Branch branch = new Branch();
+        branch.setName(name);
+        branch.setAddress(txtBranchAddress.getText().trim());
+        branch.setLowStockThreshold(parseBranchThreshold());
+
+        branchService.saveBranch(branch);
+        handleBranchClearForm(null);
+        refreshBranchList();
+        refreshAllBranchCombos();
+        showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã thêm chi nhánh mới thành công.");
+    }
+
+    @FXML
+    void handleBranchUpdate(ActionEvent event) {
+        if (!checkCurrentUserActive()) return;
+        Branch selected = branchTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng chọn chi nhánh từ bảng để sửa.");
+            return;
+        }
+        if (!validateBranchForm()) return;
+
+        String newName = txtBranchName.getText().trim();
+        // Kiểm tra trùng tên (trừ chính nó)
+        boolean exists = branchService.getAllBranches().stream()
+                .anyMatch(b -> !b.getId().equals(selected.getId()) && b.getName().equalsIgnoreCase(newName));
+        if (exists) {
+            showBranchError("Tên chi nhánh đã tồn tại!");
+            return;
+        }
+
+        selected.setName(newName);
+        selected.setAddress(txtBranchAddress.getText().trim());
+        selected.setLowStockThreshold(parseBranchThreshold());
+
+        branchService.saveBranch(selected);
+        handleBranchClearForm(null);
+        refreshBranchList();
+        refreshAllBranchCombos();
+        showAlert(Alert.AlertType.INFORMATION, "Thành công", "Cập nhật chi nhánh thành công.");
+    }
+
+    @FXML
+    void handleBranchDelete(ActionEvent event) {
+        if (!checkCurrentUserActive()) return;
+        Branch selected = branchTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng chọn chi nhánh từ bảng để xóa.");
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "Bạn có chắc chắn muốn xóa chi nhánh \"" + selected.getName() + "\" không?\n" +
+                "Lưu ý: Xóa sẽ thất bại nếu chi nhánh còn nhân viên hoặc tồn kho.",
+                ButtonType.YES, ButtonType.NO);
+        confirm.setTitle("Xác nhận xóa chi nhánh");
+        confirm.setHeaderText(null);
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.YES) {
+                try {
+                    branchService.deleteBranch(selected.getId());
+                    handleBranchClearForm(null);
+                    refreshBranchList();
+                    refreshAllBranchCombos();
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã xóa chi nhánh thành công.");
+                } catch (Exception e) {
+                    showAlert(Alert.AlertType.ERROR, "Lỗi",
+                            "Không thể xóa chi nhánh này. Có thể do còn nhân viên, tồn kho hoặc phiếu liên quan.");
+                }
+            }
+        });
+    }
+
+    @FXML
+    void handleBranchClearForm(ActionEvent event) {
+        txtBranchName.clear();
+        txtBranchAddress.clear();
+        txtBranchThreshold.clear();
+        branchErrorLabel.setVisible(false);
+        branchErrorLabel.setManaged(false);
+        branchTable.getSelectionModel().clearSelection();
+    }
+
+    private boolean validateBranchForm() {
+        if (txtBranchName.getText().trim().isEmpty() || txtBranchAddress.getText().trim().isEmpty()) {
+            showBranchError("Vui lòng nhập tên và địa chỉ chi nhánh!");
+            return false;
+        }
+        String thresholdStr = txtBranchThreshold.getText().trim();
+        if (!thresholdStr.isEmpty()) {
+            try {
+                int val = Integer.parseInt(thresholdStr);
+                if (val < 0) {
+                    showBranchError("Ngưỡng cảnh báo phải >= 0!");
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                showBranchError("Ngưỡng cảnh báo phải là số nguyên hợp lệ!");
+                return false;
+            }
+        }
+        branchErrorLabel.setVisible(false);
+        branchErrorLabel.setManaged(false);
+        return true;
+    }
+
+    private int parseBranchThreshold() {
+        String s = txtBranchThreshold.getText().trim();
+        if (s.isEmpty()) return 5;
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return 5;
+        }
+    }
+
+    private void showBranchError(String msg) {
+        branchErrorLabel.setText(msg);
+        branchErrorLabel.setVisible(true);
+        branchErrorLabel.setManaged(true);
+    }
+
+    /** Cập nhật lại tất cả ComboBox chi nhánh trong app sau khi thêm/sửa/xóa chi nhánh. */
+    private void refreshAllBranchCombos() {
+        List<Branch> branches = branchService.getAllBranches();
+
+        // Dashboard filter
+        if ("ADMIN".equals(currentUser.getRole())) {
+            ObservableList<Object> filterOptions = FXCollections.observableArrayList();
+            filterOptions.add("Tất cả chi nhánh");
+            filterOptions.addAll(branches);
+            dashBranchFilter.setItems(filterOptions);
+            dashBranchFilter.getSelectionModel().selectFirst();
+        }
+
+        // Receipt panel combos
+        cbReceiptSrcBranch.setItems(FXCollections.observableArrayList(branches));
+        cbReceiptDestBranch.setItems(FXCollections.observableArrayList(branches));
+
+        // History filters
+        ObservableList<Object> histSrcOptions = FXCollections.observableArrayList();
+        histSrcOptions.add("Tất cả");
+        histSrcOptions.add("Không có");
+        histSrcOptions.addAll(branches);
+        histSrcFilter.setItems(histSrcOptions);
+        histSrcFilter.getSelectionModel().selectFirst();
+
+        ObservableList<Object> histDestOptions = FXCollections.observableArrayList();
+        histDestOptions.add("Tất cả");
+        histDestOptions.add("Không có");
+        histDestOptions.addAll(branches);
+        histDestFilter.setItems(histDestOptions);
+        histDestFilter.getSelectionModel().selectFirst();
+
+        // User panel branch combo (Admin only)
+        if ("ADMIN".equals(currentUser.getRole())) {
+            cbUserBranch.setItems(FXCollections.observableArrayList(branches));
+
+            ObservableList<Object> branchFilterOptions = FXCollections.observableArrayList();
+            branchFilterOptions.add("Tất cả");
+            branchFilterOptions.add("Không có (Admin)");
+            branchFilterOptions.addAll(branches);
+            userBranchFilter.setItems(branchFilterOptions);
+            userBranchFilter.getSelectionModel().selectFirst();
+        }
     }
 }

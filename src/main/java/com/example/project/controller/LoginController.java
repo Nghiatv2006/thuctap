@@ -6,13 +6,14 @@ import com.example.project.service.UserService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -30,6 +31,12 @@ public class LoginController {
     private PasswordField passwordField;
 
     @FXML
+    private TextField passwordTextField;
+
+    @FXML
+    private CheckBox showPasswordCheck;
+
+    @FXML
     private Label errorLabel;
 
     @FXML
@@ -42,6 +49,32 @@ public class LoginController {
     public LoginController(UserService userService, ApplicationContext applicationContext) {
         this.userService = userService;
         this.applicationContext = applicationContext;
+    }
+
+    @FXML
+    public void initialize() {
+        // Đồng bộ nội dung 2 chiều giữa PasswordField và TextField hiện mật khẩu
+        passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
+
+        // Cho phép nhấn Enter ở ô username/password để đăng nhập
+        usernameField.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) handleLogin(null);
+        });
+        passwordField.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) handleLogin(null);
+        });
+        passwordTextField.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) handleLogin(null);
+        });
+    }
+
+    @FXML
+    public void handleTogglePassword(ActionEvent event) {
+        boolean show = showPasswordCheck.isSelected();
+        passwordTextField.setVisible(show);
+        passwordTextField.setManaged(show);
+        passwordField.setVisible(!show);
+        passwordField.setManaged(!show);
     }
 
     @FXML
@@ -71,7 +104,7 @@ public class LoginController {
             UserSession.setCurrentUser(user);
             try {
                 // Đổi giao diện sang Dashboard chính
-                switchSceneToDashboard(event);
+                switchSceneToDashboard();
             } catch (IOException e) {
                 e.printStackTrace();
                 showError("Lỗi hệ thống khi chuyển cảnh: " + e.getMessage());
@@ -89,12 +122,13 @@ public class LoginController {
         errorLabel.setManaged(true);
     }
 
-    private void switchSceneToDashboard(ActionEvent event) throws IOException {
+    private void switchSceneToDashboard() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
         loader.setControllerFactory(applicationContext::getBean);
         Parent root = loader.load();
 
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        // Lấy Stage từ loginButton (luôn có sẵn, an toàn cả khi đăng nhập bằng Enter)
+        Stage stage = (Stage) loginButton.getScene().getWindow();
         Scene scene = new Scene(root, 1100, 750); // Màn hình chính rộng rãi
         stage.setScene(scene);
         stage.setTitle("Hệ thống Quản lý Kho hàng - Chào " + UserSession.getCurrentUser().getFullName());
